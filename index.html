@@ -2,89 +2,113 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nikol Tenis - Проект</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NIKOL TENIS</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+      // !!! ЗАМЕНИТЕ ЭТОТ БЛОК НА ВАШ config ИЗ FIREBASE CONSOLE !!!
+      const firebaseConfig = {
+        apiKey: "ВАШ_API_KEY",
+        authDomain: "ВАШ_PROJECT_ID.firebaseapp.com",
+        projectId: "ВАШ_PROJECT_ID",
+        storageBucket: "ВАШ_PROJECT_ID.appspot.com",
+        messagingSenderId: "ВАШ_SENDER_ID",
+        appId: "ВАШ_APP_ID"
+      };
+      // Инициализация
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+    </script>
+
     <style>
-        :root { --accent: #ff9f43; --bg-card: rgba(255, 255, 255, 0.1); }
-        body { 
-            margin: 0; background: #1a1c2c; color: white; 
-            font-family: 'Segoe UI', sans-serif; padding: 20px; 
-            background: linear-gradient(145deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
+        :root {
+            --accent-orange: #f59e0b;
+            --accent-cyan: #22d3ee;
+            --bg-card: rgba(15, 23, 42, 0.7);
+            --text-main: #f1f5f9;
         }
-        .container { max-width: 450px; margin: auto; }
-        .card { 
-            background: var(--bg-card); backdrop-filter: blur(15px); 
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px; padding: 20px; margin-bottom: 20px;
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: #0f172a url('image_2.png') no-repeat center center fixed; /* <--- Замените на чистый фон */
+            background-size: cover;
+            color: var(--text-main);
+            height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
-        input { 
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; 
-            border: none; background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;
+
+        /* Общие карточки */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
         }
-        button { 
-            width: 100%; padding: 12px; border-radius: 12px; border: none; 
-            background: var(--accent); color: white; font-weight: bold; cursor: pointer;
+
+        /* Заголовки */
+        h1.header-title { text-align: center; color: #fff; font-size: 24px; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 1px; }
+        h1.header-title::before { content: '🏸 '; }
+        h2.section-title { font-size: 16px; font-weight: 600; margin: 0 0 10px 0; color: #cbd5e1; text-transform: uppercase; }
+
+        /* Ввод */
+        input {
+            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px;
+            border: none; background: rgba(0, 0, 0, 0.3);
+            color: #fff; font-size: 14px; box-sizing: border-box;
+            outline: none; transition: border 0.3s;
         }
-        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .photo-box { height: 100px; background: #4a192c; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
-        #app-screen { display: none; }
+        input:focus { border: 1px solid var(--accent-cyan); }
+
+        /* Кнопки (Один в один по дизайну) */
+        button {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            color: #fff; font-weight: bold; font-size: 14px; text-transform: uppercase;
+            cursor: pointer; transition: background 0.3s;
+        }
+        button.btn-orange { background: var(--accent-orange); }
+        button.btn-orange:hover { background: #d97706; }
+        button.btn-cyan { background: var(--accent-cyan); color: #000; }
+        button.btn-cyan:hover { background: #06b6d4; }
+        button.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); }
+        button.btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+        /* Экраны */
+        #auth-screen, #app-screen { width: 360px; height: 640px; display: none; flex-direction: column; position: relative; }
+        .visible { display: flex !important; }
+
+        /* Контент приложения */
+        .content { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .content::-webkit-scrollbar { width: 4px; }
+        .content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        /* Специфические элементы (Чат) */
+        #chat-messages { height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; font-size: 13px; margin: 10px 0; }
+        .msg-line { margin-bottom: 6px; }
+        .msg-author { font-weight: bold; color: var(--accent-cyan); }
     </style>
 </head>
 <body>
 
-<div id="auth-screen" class="container">
-    <div class="card" style="margin-top: 100px;">
-        <h2 style="text-align:center; color: var(--accent);">NIKOL TENIS</h2>
-        <input type="text" id="username" placeholder="Имя игрока">
-        <input type="password" id="pass" placeholder="Пароль">
-        <button onclick="login()">ВОЙТИ</button>
-    </div>
-</div>
-
-<div id="app-screen" class="container">
-    <h1 style="text-align:center;">NIKOL TENIS</h1>
+<div id="auth-screen" class="card visible">
+    <h1 class="header-title">NIKOL TENIS</h1>
+    <h2 class="section-title">ВХОД</h2>
+    <input type="email" id="auth-email" placeholder="E-mail">
+    <input type="password" id="auth-pass" placeholder="Пароль">
     
-    <div class="card">
-        <h3>Друзья</h3>
-        <input type="text" placeholder="ID игрока">
-        <button>ДОБАВИТЬ В КОМАНДУ</button>
-    </div>
-
-    <div class="card">
-        <h3>Галерея матчей</h3>
-        <div class="gallery-grid">
-            <div class="photo-box">📸</div>
-            <div class="photo-box">📸</div>
-        </div>
-        <button style="margin-top:10px;">ЗАГРУЗИТЬ ФОТО</button>
-    </div>
-
-    <div class="card">
-        <h3>Чат</h3>
-        <div id="chat" style="height: 100px; overflow-y:auto; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; font-size: 14px;">
-            Система: Добро пожаловать!
-        </div>
-        <input type="text" id="msg" placeholder="Сообщение...">
-        <button onclick="send()">ОТПРАВИТЬ</button>
+    <div style="margin-top:20px;">
+        <button class="btn-cyan" style="margin-bottom:10px;" onclick="handleAuth('login')">ВХОД ДЛЯ ИГРОКА</button>
+        <button class="btn-outline" style="margin-bottom:10px;" onclick="handleAuth('register')">РЕГИСТРАЦИЯ</button>
+        <button class="btn-orange">ВХОД ДЛЯ АДМИНА</button>
     </div>
 </div>
 
-<script>
-    function login() {
-        const u = document.getElementById('username').value;
-        if(u) {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app-screen').style.display = 'block';
-        }
-    }
-    function send() {
-        const m = document.getElementById('msg').value;
-        if(m) {
-            document.getElementById('chat').innerHTML += `<br><b>Вы:</b> ${m}`;
-            document.getElementById('msg').value = '';
-        }
-    }
-</script>
-</body>
-</html>
+<div id="app-screen">
+    <div style="text-align: right; margin-bottom: 5px;"><button onclick="logout()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 11px;">Выйти</button></div>
+    <h1 class="header-title">NIKOL TENIS
