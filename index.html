@@ -3,76 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nikol Tenis</title>
+    <title>Nikol Tenis - Проект</title>
     <style>
-        :root { --accent: #ff4757; --bg: #2f3542; }
-        body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; }
-        
-        /* Спортивный дизайн */
-        .racket-frame { border: 8px solid #ffa502; border-radius: 50px; padding: 20px; background: rgba(0,0,0,0.3); }
-        h1 { text-align: center; color: #ffa502; text-transform: uppercase; }
-        
-        section { margin-bottom: 30px; }
-        button { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-
-        /* Галерея */
-        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
-        .photo-placeholder { height: 100px; background: #57606f; border-radius: 8px; }
-
-        /* Админка и чат */
-        #admin-panel { display: none; border-top: 2px solid var(--accent); padding-top: 10px; }
-        .chat-box { height: 150px; background: #1e272e; overflow-y: scroll; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        :root { --accent: #ff9f43; --bg-card: rgba(255, 255, 255, 0.1); }
+        body { 
+            margin: 0; background: #1a1c2c; color: white; 
+            font-family: 'Segoe UI', sans-serif; padding: 20px; 
+            background: linear-gradient(145deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+        }
+        .container { max-width: 450px; margin: auto; }
+        .card { 
+            background: var(--bg-card); backdrop-filter: blur(15px); 
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px; padding: 20px; margin-bottom: 20px;
+        }
+        input { 
+            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; 
+            border: none; background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;
+        }
+        button { 
+            width: 100%; padding: 12px; border-radius: 12px; border: none; 
+            background: var(--accent); color: white; font-weight: bold; cursor: pointer;
+        }
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .photo-box { height: 100px; background: #4a192c; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+        #app-screen { display: none; }
     </style>
 </head>
 <body>
 
-<div class="racket-frame">
-    <h1>Nikol Tenis</h1>
+<div id="auth-screen" class="container">
+    <div class="card" style="margin-top: 100px;">
+        <h2 style="text-align:center; color: var(--accent);">NIKOL TENIS</h2>
+        <input type="text" id="username" placeholder="Имя игрока">
+        <input type="password" id="pass" placeholder="Пароль">
+        <button onclick="login()">ВОЙТИ</button>
+    </div>
+</div>
 
-    <section>
+<div id="app-screen" class="container">
+    <h1 style="text-align:center;">NIKOL TENIS</h1>
+    
+    <div class="card">
         <h3>Друзья</h3>
-        <input type="text" id="friendName" placeholder="Имя друга">
-        <button onclick="addFriend()">Добавить</button>
-        <ul id="friendsList"></ul>
-    </section>
+        <input type="text" placeholder="ID игрока">
+        <button>ДОБАВИТЬ В КОМАНДУ</button>
+    </div>
 
-    <section>
-        <h3>Галерея</h3>
-        <div class="gallery" id="gallery">
-            <div class="photo-placeholder"></div>
-            <div class="photo-placeholder"></div>
+    <div class="card">
+        <h3>Галерея матчей</h3>
+        <div class="gallery-grid">
+            <div class="photo-box">📸</div>
+            <div class="photo-box">📸</div>
         </div>
-    </section>
+        <button style="margin-top:10px;">ЗАГРУЗИТЬ ФОТО</button>
+    </div>
 
-    <button onclick="toggleAdmin()">Вход для Админа</button>
-
-    <div id="admin-panel">
-        <h3>Админ-панель</h3>
-        <div class="chat-box" id="chat">Чат: пока сообщений нет...</div>
-        <input type="text" id="msg" placeholder="Ответить...">
-        <button onclick="sendMsg()">Отправить</button>
+    <div class="card">
+        <h3>Чат</h3>
+        <div id="chat" style="height: 100px; overflow-y:auto; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; font-size: 14px;">
+            Система: Добро пожаловать!
+        </div>
+        <input type="text" id="msg" placeholder="Сообщение...">
+        <button onclick="send()">ОТПРАВИТЬ</button>
     </div>
 </div>
 
 <script>
-    function addFriend() {
-        const name = document.getElementById('friendName').value;
-        if(name) {
-            const li = document.createElement('li');
-            li.textContent = name;
-            document.getElementById('friendsList').appendChild(li);
+    function login() {
+        const u = document.getElementById('username').value;
+        if(u) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
         }
     }
-
-    function toggleAdmin() {
-        const panel = document.getElementById('admin-panel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function sendMsg() {
-        const msg = document.getElementById('msg').value;
-        const chat = document.getElementById('chat');
-        chat.innerHTML += `<br>Админ: ${msg}`;
+    function send() {
+        const m = document.getElementById('msg').value;
+        if(m) {
+            document.getElementById('chat').innerHTML += `<br><b>Вы:</b> ${m}`;
+            document.getElementById('msg').value = '';
+        }
     }
 </script>
 </body>
