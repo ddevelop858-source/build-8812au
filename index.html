@@ -1,118 +1,73 @@
-    <div class="content">
-        <div class="card" style="margin-bottom: 15px;">
-            <h2 class="section-title">1. Друзья</h2>
-            <div id="friends-list" style="margin-bottom: 10px;">
-                <div style="font-size:12px; color:#aaa; text-align:center;">Загрузка списка...</div>
-            </div>
-            <input type="text" id="friend-id" placeholder="Введи имя/ID">
-            <button class="btn-cyan" onclick="addFriend()">ДОБАВИТЬ</button>
-        </div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nikol Tenis</title>
+    <style>
+        /* СТИЛИ: делаем красиво */
+        body { 
+            margin: 0; 
+            background: #1a1c2c; 
+            color: white; 
+            font-family: sans-serif; 
+            padding: 15px;
+        }
+        .card { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 15px; 
+            padding: 15px; 
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        h1, h2 { color: #ff9f43; }
+        input { 
+            width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; 
+            border: none; background: #2f3542; color: white; box-sizing: border-box;
+        }
+        button { 
+            width: 100%; padding: 10px; border-radius: 8px; border: none; 
+            background: #ff9f43; color: white; font-weight: bold; margin-top: 5px;
+        }
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .photo-box { height: 80px; background: #57606f; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        #chat { height: 100px; background: #2f3542; border-radius: 8px; padding: 10px; overflow-y: auto; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
 
-        <div class="card" style="margin-bottom: 15px;">
-            <h2 class="section-title">2. Галерея</h2>
-            <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                <img src="https://via.placeholder.com/150x100?text=Match+1" alt="Match 1" style="width:100%; border-radius:10px;">
-                <img src="https://via.placeholder.com/150x100?text=Match+2" alt="Match 2" style="width:100%; border-radius:10px;">
-                <img src="https://via.placeholder.com/150x100?text=Training" alt="Training" style="width:100%; border-radius:10px;">
-                <img src="https://via.placeholder.com/150x100?text=Team" alt="Team" style="width:100%; border-radius:10px;">
-            </div>
-            <button class="btn-orange" style="margin-top:10px;">ЗАГРУЗИТЬ ФОТО</button>
-        </div>
+    <h1>NIKOL TENIS</h1>
 
-        <div class="card">
-            <h2 class="section-title">ЧАТ СООБЩЕСТВА</h2>
-            <div id="chat-messages">
-                </div>
-            <input type="text" id="chat-input" placeholder="Твой ответ...">
-            <button class="btn-cyan" onclick="sendMessage()">ОТПРАВИТЬ</button>
-        </div>
+    <div class="card">
+        <h2>1. Друзья</h2>
+        <input type="text" placeholder="Имя друга">
+        <button>ДОБАВИТЬ</button>
     </div>
-</div>
 
-<script>
-    // --- ВСЯ ЛОГИКА ОДИН В ОДИН ---
+    <div class="card">
+        <h2>2. Галерея</h2>
+        <div class="gallery-grid">
+            <div class="photo-box">Match 1</div>
+            <div class="photo-box">Match 2</div>
+            <div class="photo-box">Training</div>
+            <div class="photo-box">Team</div>
+        </div>
+        <button>ЗАГРУЗИТЬ ФОТО</button>
+    </div>
 
-    // 1. Авторизация и Логика экранов
-    function handleAuth(type) {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-pass').value;
-        
-        if(!email || !pass) return alert("Заполни поля!");
+    <div class="card">
+        <h2>ЧАТ СООБЩЕСТВА</h2>
+        <div id="chat">...</div>
+        <input type="text" id="msg" placeholder="Твой ответ...">
+        <button onclick="send()">ОТПРАВИТЬ</button>
+    </div>
 
-        if (type === 'register') {
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then(() => alert("Успешная регистрация!"))
-                .catch(e => alert(e.message));
-        } else {
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(e => alert(e.message));
+    <script>
+        function send() {
+            let m = document.getElementById('msg').value;
+            if(m) document.getElementById('chat').innerHTML += "<div>" + m + "</div>";
+            document.getElementById('msg').value = "";
         }
-    }
-
-    // Слушаем вход/выход
-    auth.onAuthStateChanged(user => {
-        const authScr = document.getElementById('auth-screen');
-        const appScr = document.getElementById('app-screen');
-        if (user) {
-            authScr.classList.remove('visible');
-            appScr.classList.add('visible');
-            loadChat(); // Загружаем чат при входе
-            loadFriends(); // Загружаем друзей
-        } else {
-            authScr.classList.add('visible');
-            appScr.classList.remove('visible');
-        }
-    });
-
-    function logout() { auth.signOut(); }
-
-    // 2. Реализация ЧАТА через Firebase (Realtime)
-    function loadChat() {
-        const chatBox = document.getElementById('chat-messages');
-        // Слушаем изменения в коллекции 'messages'
-        db.collection('messages').orderBy('time').onSnapshot(snapshot => {
-            chatBox.innerHTML = ''; // Очищаем перед обновлением
-            snapshot.forEach(doc => {
-                const m = doc.data();
-                chatBox.innerHTML += `
-                    <div class="msg-line">
-                        <span class="msg-author">${m.user.split('@')[0]}:</span> 
-                        <span class="msg-text">${m.text}</span>
-                    </div>
-                `;
-            });
-            chatBox.scrollTop = chatBox.scrollHeight; // Скролл вниз
-        });
-    }
-
-    function sendMessage() {
-        const input = document.getElementById('chat-input');
-        const user = auth.currentUser;
-        if(input.value && user) {
-            db.collection('messages').add({
-                user: user.email,
-                text: input.value,
-                time: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            input.value = ''; // Очистить поле
-        }
-    }
-
-    // 3. Реализация ДРУЗЕЙ (Простая)
-    function loadFriends() {
-        // Чтобы сделать статусы (online/offline), нужен Firebase Realtime DB,
-        // для монолита в Acode сделаем просто список игроков
-        const list = document.getElementById('friends-list');
-        list.innerHTML = `
-            <div style="font-size:13px; margin: 4px 0;"><span style="color:#10b981;">●</span> Ivan P. (Online)</div>
-            <div style="font-size:13px; margin: 4px 0;"><span style="color:#ef4444;">●</span> Anna K. (Offline)</div>
-        `;
-    }
-
-    function addFriend() {
-        const id = document.getElementById('friend-id').value;
-        if(id) alert(`Запрос отправлен игроку ${id}`);
-    }
-</script>
+    </script>
 </body>
 </html>
